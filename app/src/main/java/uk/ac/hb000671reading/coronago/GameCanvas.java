@@ -7,15 +7,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Neyma Siddiqui 25/03/20
  */
 public class GameCanvas extends View {
-    //private final Object SoundsBar;
     //Canvas
     private int canvasWidth;
     private int canvasHeight;
@@ -27,8 +28,6 @@ public class GameCanvas extends View {
     private int playerY;
     private int playerSpeed;
 
-    //Player
-    private Bitmap plyPlayer;
 
     //Obstacle
     private int sanitizerX = 10;
@@ -45,11 +44,7 @@ public class GameCanvas extends View {
     private int maskY;
     private int maskSpeed = 2;
 
-    //coronavirus
-    private int coronaX;
-    private int coronaY;
-    private int coronaSpeed = 20;
-
+private List<CoronaObject> coronaObjectList = new ArrayList<>();
 
     //Background
     private Bitmap backgroundImage;
@@ -57,6 +52,9 @@ public class GameCanvas extends View {
     //Scorer
     private Paint scorerPaint = new Paint();
     private int scorer;
+
+    private ScoreManager scoreManager;
+    private int highScore;
 
     //Levels
     private Paint levelsPaint = new Paint();
@@ -79,18 +77,15 @@ public class GameCanvas extends View {
     private Bitmap buttonReturn;
     private int imageButtonX;
     private int imageButtonY;
+    private Paint highScoreTitlePaint = new Paint();
 
     //obstacles
     private final Bitmap sanitizer;
     private final Bitmap gloves;
     private final Bitmap mask;
-    private final Bitmap corona;
 
     //Sound
     SoundsBar soundsBar;
-
-
-
 
     public GameCanvas(Context context) {
         super(context);
@@ -108,8 +103,7 @@ public class GameCanvas extends View {
         gloves = BitmapFactory.decodeResource(getResources(), R.drawable.gloves1);
         //mask
         mask = BitmapFactory.decodeResource(getResources(), R.drawable.mask);
-        //corona
-        corona = BitmapFactory.decodeResource(getResources(), R.drawable.covid);
+
 
         scorerPaint.setColor(Color.BLUE);
         scorerPaint.setTextSize(35);
@@ -128,11 +122,20 @@ public class GameCanvas extends View {
         buttonStart = BitmapFactory.decodeResource(getResources(),R.drawable.start_btn);
         buttonReturn = BitmapFactory.decodeResource(getResources(),R.drawable.return_btn);
 
+        highScoreTitlePaint.setTextSize(36);
+        highScoreTitlePaint.setTypeface(Typeface.DEFAULT_BOLD);
+        highScoreTitlePaint.setTextAlign(Paint.Align.CENTER);
+
         //Original Position
 
         gameScene = START_GAME;
+        //sound
 
         soundsBar = new SoundsBar(context);
+
+        //Score
+        scoreManager = new ScoreManager(context);
+        highScore = scoreManager.loadHighScore();
     }
 
     @Override
@@ -219,32 +222,62 @@ public class GameCanvas extends View {
         }
         canvas.drawBitmap(mask, maskX,maskY,null);
 
-        //CoronavirusCollision
-        coronaX -= coronaSpeed;
-        if(collisionCheck(coronaX, coronaY)){
-            coronaX = -100;
-            life_count --;
-            soundsBar.playHitCoronaSound();
+        //Levels Up
+        int level = (int)Math.floor(scorer/50)+1;
+
+
+
+        //Add Corona every level
+        if(coronaObjectList.size() < level){
+            for(int i = coronaObjectList.size(); i< level; i++) {
+                int x = canvasWidth + 200;
+                int y = (int) Math.floor(Math.random() * (maxPlayerY - minPlayerY)) + minPlayerY;
+                CoronaObject coronaObject = new CoronaObject(x, y);
+                coronaObjectList.add(coronaObject);
+            }
+        }
+for(int i= 0; i < coronaObjectList.size(); i++){
+    CoronaObject coronaObject = coronaObjectList.get(i);
+    coronaObject.moveCorona(20);
+
+    if (collisionCheck(coronaObject.getxCoronaPos(),coronaObject.getyCoronaPos())){
+        life_count --;
+        soundsBar.playHitCoronaSound();
 
             if(life_count == 0){
                 //Print Game Over
-                soundsBar.pauseBackgroundMusic();
+                if(scorer > highScore){
+                    //save score
+                   scoreManager.saveScore(scorer);
+                    //update highscore
+                    highScore = scorer;
+                }
              gameScene = GAME_OVER;
              return;
+
             }
-        }
-        if(coronaX < 0){
-            coronaX = canvasWidth + 200;
-            coronaY = (int)Math.floor(Math.random()*(maxPlayerY - minPlayerY)) + minPlayerY;
-        }
-        //DrawCoronaEnemy
-        canvas.drawBitmap(corona, coronaX,coronaY,null);
+            //Remove from List
+        coronaObjectList.remove(i);
+            i--;
+            continue;
+    }
+    if(coronaObject.getxCoronaPos() < 0){
+        //remove from list
+        coronaObjectList.remove(i);
+        i--;
+        continue;
+    }
+canvas.drawBitmap(coronaObject,xCoronaPos,yCoronaPos,null);
+
+}
+
+
 
         //Scores
         canvas.drawText("Score: 0" + scorer, 35, 60, scorerPaint);
 
         //Levels
-        canvas.drawText("Level 1", canvasWidth/2,60,levelsPaint);
+        canvas.drawText("Level." + level, canvasWidth/2,60,levelsPaint);
 
         //Lives
         for(int i = 0; i<3; i++){
@@ -263,15 +296,18 @@ public class GameCanvas extends View {
         playerY = canvasHeight/2;
         maskX = -100;
         glovesX = -100;
-        coronaX = -100;
+       // coronaX = -100;
         sanitizerX = -100;
         scorer = 0;
         life_count = 3;
 
+        canvas.drawText("High Score :" + highScore, canvasWidth/2,canvasHeight/2,highScoreTitlePaint);
         canvas.drawBitmap(buttonStart, imageButtonX,imageButtonY,null);
 
     }
     public void drawGameOverPage(Canvas canvas){
+
+        canvas.drawText("Score : " + highScore, canvasWidth/2,canvasHeight/2,highScoreTitlePaint);
 
         canvas.drawBitmap(buttonReturn,imageButtonX,imageButtonY,null);
     }
@@ -291,8 +327,6 @@ public class GameCanvas extends View {
                 case START_GAME:
                     //check start button
                     if(pressStart(buttonStart, (int)event.getX(),(int)event.getY())){
-                        soundsBar.seektoTapforSound();
-                        soundsBar.playBackgroundMusic();
                         gameScene = PLAY_GAME;
 
                     }

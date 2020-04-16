@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-      //  setContentView(R.layout.activity_main);
+        //  setContentView(R.layout.activity_main);
 
         gameCanvas = new GameCanvas(this);
         setContentView(gameCanvas);
@@ -35,17 +35,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 0, TIMER_INTERVAL);
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(gameCanvas.getGameScene()==1)gameCanvas.soundsBar.playBackgroundMusic();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        gameCanvas.soundsBar.pauseBackgroundMusic();
     }
 }
