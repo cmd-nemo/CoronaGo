@@ -15,6 +15,7 @@ import android.view.View;
  * Created by Neyma Siddiqui 25/03/20
  */
 public class GameCanvas extends View {
+    //private final Object SoundsBar;
     //Canvas
     private int canvasWidth;
     private int canvasHeight;
@@ -72,7 +73,6 @@ public class GameCanvas extends View {
     private static final int GAME_OVER = 2;
 
     //START/GAME OVER
-
     private Bitmap imageStart;
     private Bitmap imageGameOver;
     private Bitmap buttonStart;
@@ -80,11 +80,15 @@ public class GameCanvas extends View {
     private int imageButtonX;
     private int imageButtonY;
 
-
+    //obstacles
     private final Bitmap sanitizer;
     private final Bitmap gloves;
     private final Bitmap mask;
     private final Bitmap corona;
+
+    //Sound
+    SoundsBar soundsBar;
+
 
 
 
@@ -127,6 +131,8 @@ public class GameCanvas extends View {
         //Original Position
 
         gameScene = START_GAME;
+
+        soundsBar = new SoundsBar(context);
     }
 
     @Override
@@ -157,12 +163,6 @@ public class GameCanvas extends View {
     }
     public void drawPlayPage(Canvas canvas){
 
-
-
-
-
-
-
         //Player
         int minPlayerY = player[0].getHeight();
         int maxPlayerY = canvasHeight - player[0].getHeight()*3;
@@ -185,7 +185,7 @@ public class GameCanvas extends View {
         if(collisionCheck(sanitizerX, sanitizerY)){
             scorer +=10;
             sanitizerX =- 100;
-
+            soundsBar.playScorePointSound();
         }
         if(sanitizerX<0){
             sanitizerX = canvasWidth + 20;
@@ -198,7 +198,7 @@ public class GameCanvas extends View {
         if(collisionCheck(glovesX, glovesY)){
             scorer +=20;
             glovesX =- 100;
-
+            soundsBar.playScorePointSound();
         }
         if(glovesX<0){
             glovesX = canvasWidth + 20;
@@ -211,7 +211,7 @@ public class GameCanvas extends View {
         if(collisionCheck(maskX, maskY)){
             scorer +=15;
             maskX =- 100;
-
+            soundsBar.playScorePointSound();
         }
         if(maskX<0){
             maskX = canvasWidth + 20;
@@ -224,8 +224,11 @@ public class GameCanvas extends View {
         if(collisionCheck(coronaX, coronaY)){
             coronaX = -100;
             life_count --;
+            soundsBar.playHitCoronaSound();
+
             if(life_count == 0){
                 //Print Game Over
+                soundsBar.pauseBackgroundMusic();
              gameScene = GAME_OVER;
              return;
             }
@@ -274,10 +277,6 @@ public class GameCanvas extends View {
     }
 
 
-
-
-
-
     public boolean collisionCheck(int x, int y){
         if(playerX < x && x < (playerX + player[0].getWidth())&& playerY < y && y <(playerY + player[0].getHeight())){
             return true;
@@ -292,6 +291,8 @@ public class GameCanvas extends View {
                 case START_GAME:
                     //check start button
                     if(pressStart(buttonStart, (int)event.getX(),(int)event.getY())){
+                        soundsBar.seektoTapforSound();
+                        soundsBar.playBackgroundMusic();
                         gameScene = PLAY_GAME;
 
                     }
@@ -316,5 +317,8 @@ public class GameCanvas extends View {
             return true;
         }
         return false;
+    }
+    public int getGameScene(){
+        return gameScene;
     }
 }
