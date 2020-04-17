@@ -71,6 +71,7 @@ public class GameCanvas extends View {
     private static final int PLAY_GAME = 1;
     private static final int GAME_OVER = 2;
 
+
     //START/GAME OVER
     private Bitmap imageStart;
     private Bitmap imageGameOver;
@@ -231,7 +232,7 @@ public class GameCanvas extends View {
                 int x = canvasWidth + 200;
                 int y = (int) Math.floor(Math.random() * (maxPlayerY - minPlayerY)) + minPlayerY;
               //  CoronaObject obj = CoronaObject(getContext(),x,y);
-              CoronaObject coronaObject = new CoronaObject(null,20,0);
+              CoronaObject coronaObject = new CoronaObject(null,30,0);
                 coronaObjectList.add(coronaObject);
             }
         }
@@ -266,7 +267,7 @@ for(int i= 0; i < coronaObjectList.size(); i++){
         i--;
         continue;
     }
-    coronaObject.draw(canvas,20);
+    coronaObject.draw(canvas,20,0);
 }
 
         //Scores

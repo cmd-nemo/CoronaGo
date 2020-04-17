@@ -25,8 +25,7 @@ public class CoronaObject {
     public void moveCorona(int speed){
         xCoronaPos -= speed;
     }
-
-    public void draw (Canvas canvas,int xCoronaPos){
+    public void draw (Canvas canvas,int xCoronaPos,int yCoronaPos){
         canvas.drawBitmap(coronaObject,xCoronaPos,yCoronaPos,null);
     }
 }
