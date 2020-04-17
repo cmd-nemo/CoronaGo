@@ -44,7 +44,8 @@ public class GameCanvas extends View {
     private int maskY;
     private int maskSpeed = 2;
 
-private List<CoronaObject> coronaObjectList = new ArrayList<>();
+    //Corona
+    private List<CoronaObject> coronaObjectList = new ArrayList<>();
 
     //Background
     private Bitmap backgroundImage;
@@ -86,7 +87,6 @@ private List<CoronaObject> coronaObjectList = new ArrayList<>();
 
     //Sound
     SoundsBar soundsBar;
-
     public GameCanvas(Context context) {
         super(context);
         player[0] = BitmapFactory.decodeResource(getResources(),R.drawable.doct1);
@@ -225,14 +225,13 @@ private List<CoronaObject> coronaObjectList = new ArrayList<>();
         //Levels Up
         int level = (int)Math.floor(scorer/50)+1;
 
-
-
         //Add Corona every level
         if(coronaObjectList.size() < level){
             for(int i = coronaObjectList.size(); i< level; i++) {
                 int x = canvasWidth + 200;
                 int y = (int) Math.floor(Math.random() * (maxPlayerY - minPlayerY)) + minPlayerY;
-                CoronaObject coronaObject = new CoronaObject(x, y);
+              //  CoronaObject obj = CoronaObject(getContext(),x,y);
+              CoronaObject coronaObject = new CoronaObject(null,20,0);
                 coronaObjectList.add(coronaObject);
             }
         }
@@ -267,8 +266,7 @@ for(int i= 0; i < coronaObjectList.size(); i++){
         i--;
         continue;
     }
-canvas.drawBitmap(coronaObject,xCoronaPos,yCoronaPos,null);
-
+    coronaObject.draw(canvas,20);
 }
 
 
@@ -289,7 +287,6 @@ canvas.drawBitmap(coronaObject,xCoronaPos,yCoronaPos,null);
                 canvas.drawBitmap(lives[1],x,y,null);
             }
         }
-
 
     }
     public void drawStartPage(Canvas canvas){
