@@ -269,8 +269,6 @@ for(int i= 0; i < coronaObjectList.size(); i++){
     coronaObject.draw(canvas,20);
 }
 
-
-
         //Scores
         canvas.drawText("Score: 0" + scorer, 35, 60, scorerPaint);
 
@@ -342,6 +340,7 @@ for(int i= 0; i < coronaObjectList.size(); i++){
         }
         return true;
     }
+
     public boolean pressStart(Bitmap button, int x, int y){
         if(imageButtonX < x && x < imageButtonX +button.getWidth()&&
         imageButtonY < y && y < imageButtonY + button.getHeight()){
